@@ -1,0 +1,61 @@
+{
+  "name": "@pulseengine/timedate-mcp-server",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol server for time and date operations with timezone support",
+  "keywords": [
+    "mcp",
+    "model-context-protocol", 
+    "time",
+    "date",
+    "timezone",
+    "rust"
+  ],
+  "author": "PulseEngine <info@pulseengine.ai>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pulseengine/timedate-mcp.git"
+  },
+  "homepage": "https://github.com/pulseengine/timedate-mcp",
+  "bugs": {
+    "url": "https://github.com/pulseengine/timedate-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bin": {
+    "timedate-mcp-server": "./bin/timedate-mcp-server"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "cargo build --release",
+    "build:all": "npm run build:linux-x64 && npm run build:darwin-x64 && npm run build:darwin-arm64 && npm run build:win32-x64",
+    "build:linux-x64": "cargo build --release --target x86_64-unknown-linux-gnu",
+    "build:darwin-x64": "cargo build --release --target x86_64-apple-darwin", 
+    "build:darwin-arm64": "cargo build --release --target aarch64-apple-darwin",
+    "build:win32-x64": "cargo build --release --target x86_64-pc-windows-gnu",
+    "test": "cargo test",
+    "lint": "cargo clippy -- -D warnings",
+    "fmt": "cargo fmt --check",
+    "clean": "cargo clean",
+    "dev": "cargo run",
+    "prepare": "npm run build",
+    "prepack": "mkdir -p bin && cp target/release/timedate-mcp-server bin/ || echo 'Binary not found, run npm run build first'"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0"
+  },
+  "optionalDependencies": {
+    "@pulseengine/timedate-mcp-server-linux-x64": "0.1.0",
+    "@pulseengine/timedate-mcp-server-darwin-x64": "0.1.0", 
+    "@pulseengine/timedate-mcp-server-darwin-arm64": "0.1.0",
+    "@pulseengine/timedate-mcp-server-win32-x64": "0.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

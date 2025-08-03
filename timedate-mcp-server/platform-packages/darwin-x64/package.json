@@ -1,0 +1,18 @@
+{
+  "name": "@pulseengine/timedate-mcp-server-darwin-x64",
+  "version": "0.1.0",
+  "description": "Darwin x64 binary for timedate-mcp-server",
+  "main": "timedate-mcp-server",
+  "os": ["darwin"],
+  "cpu": ["x64"],
+  "keywords": ["mcp", "model-context-protocol", "time", "date", "timezone"],
+  "author": "PulseEngine",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pulseengine/timedate-mcp.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

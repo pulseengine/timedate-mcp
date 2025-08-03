@@ -1,0 +1,39 @@
+[package]
+name = "timedate-mcp-server"
+version = "0.1.0"
+edition = "2021"
+description = "A Model Context Protocol server for time and date operations with timezone support"
+license = "MIT"
+authors = ["PulseEngine <info@pulseengine.ai>"]
+repository = "https://github.com/pulseengine/timedate-mcp"
+keywords = ["mcp", "model-context-protocol", "time", "date", "timezone"]
+
+[[bin]]
+name = "timedate-mcp-server"
+path = "src/main.rs"
+
+[lib]
+name = "timedate_mcp_server"
+path = "src/lib.rs"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+chrono-tz = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+clap = { workspace = true }
+async-trait = { workspace = true }
+pulseengine-mcp-server = { workspace = true }
+pulseengine-mcp-macros = { workspace = true }
+pulseengine-mcp-protocol = { workspace = true }
+pulseengine-mcp-transport = { workspace = true }
+pulseengine-mcp-auth = { workspace = true, optional = true }
+
+[features]
+default = ["auth"]
+auth = ["dep:pulseengine-mcp-auth"]

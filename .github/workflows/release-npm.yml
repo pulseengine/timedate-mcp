@@ -1,0 +1,220 @@
+name: Release NPM Package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+        default: 'v0.1.0'
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-binaries:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            archive: tar.gz
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            archive: tar.gz
+          - target: aarch64-apple-darwin
+            os: macos-14
+            archive: tar.gz
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            archive: zip
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build binary
+        run: cargo build --release --target ${{ matrix.target }} --package timedate-mcp-server
+        env:
+          PULSEENGINE_MCP_MASTER_KEY: dGVzdDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyCg==
+
+      - name: Prepare binary (Unix)
+        if: matrix.archive == 'tar.gz'
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/timedate-mcp-server dist/
+          cd dist
+          tar -czf timedate-mcp-server-${{ github.event.release.tag_name || github.event.inputs.version }}-${{ matrix.target }}.tar.gz timedate-mcp-server
+
+      - name: Prepare binary (Windows)
+        if: matrix.archive == 'zip'
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/release/timedate-mcp-server.exe dist/
+          cd dist
+          Compress-Archive -Path timedate-mcp-server.exe -DestinationPath timedate-mcp-server-${{ github.event.release.tag_name || github.event.inputs.version }}-${{ matrix.target }}.zip
+
+      - name: Upload binary to release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ github.event.release.tag_name || github.event.inputs.version }}
+          FILE="dist/timedate-mcp-server-${VERSION}-${{ matrix.target }}.${{ matrix.archive }}"
+          
+          # Check if release exists, create if not
+          if ! gh release view "${VERSION}" >/dev/null 2>&1; then
+            gh release create "${VERSION}" --title "Release ${VERSION}" --notes "Auto-generated release for ${VERSION}"
+          fi
+          
+          # Upload or update asset
+          if gh release view "${VERSION}" --json assets --jq '.assets[].name' | grep -q "timedate-mcp-server-${VERSION}-${{ matrix.target }}.${{ matrix.archive }}"; then
+            gh release delete-asset "${VERSION}" "timedate-mcp-server-${VERSION}-${{ matrix.target }}.${{ matrix.archive }}" --yes
+          fi
+          
+          gh release upload "${VERSION}" "${FILE}"
+
+  publish-npm:
+    name: Publish to NPM
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Update package version and dependencies
+        working-directory: timedate-mcp-server/npm
+        run: |
+          VERSION=${{ github.event.release.tag_name || github.event.inputs.version }}
+          # Remove 'v' prefix if present
+          VERSION=${VERSION#v}
+          
+          # Update main package version
+          npm version $VERSION --no-git-tag-version
+          
+          # Update optionalDependencies to use the same version
+          jq --arg version "$VERSION" '
+            .optionalDependencies = {
+              "@pulseengine/timedate-mcp-server-darwin-arm64": $version,
+              "@pulseengine/timedate-mcp-server-darwin-x64": $version,
+              "@pulseengine/timedate-mcp-server-linux-x64": $version,
+              "@pulseengine/timedate-mcp-server-win32-x64": $version
+            }
+          ' package.json > package.json.tmp && mv package.json.tmp package.json
+
+      - name: Install dependencies
+        working-directory: timedate-mcp-server/npm
+        run: npm install
+
+      - name: Publish to NPM
+        working-directory: timedate-mcp-server/npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create NPM release summary
+        run: |
+          echo "## 📦 NPM Package Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Package: \`@pulseengine/timedate-mcp-server\`" >> $GITHUB_STEP_SUMMARY
+          echo "Version: \`${{ github.event.release.tag_name || github.event.inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Usage:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Run with npx (no installation)" >> $GITHUB_STEP_SUMMARY
+          echo "npx @pulseengine/timedate-mcp-server --help" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Or install globally" >> $GITHUB_STEP_SUMMARY
+          echo "npm install -g @pulseengine/timedate-mcp-server" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  build-platform-packages:
+    name: Build Platform Packages
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            platform: darwin-arm64
+            binary: timedate-mcp-server
+          - target: x86_64-apple-darwin
+            platform: darwin-x64
+            binary: timedate-mcp-server
+          - target: x86_64-unknown-linux-gnu
+            platform: linux-x64
+            binary: timedate-mcp-server
+          - target: x86_64-pc-windows-msvc
+            platform: win32-x64
+            binary: timedate-mcp-server.exe
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ github.event.release.tag_name || github.event.inputs.version }}
+          ARCHIVE_EXT=${{ matrix.target == 'x86_64-pc-windows-msvc' && 'zip' || 'tar.gz' }}
+          ASSET_NAME="timedate-mcp-server-${VERSION}-${{ matrix.target }}.${ARCHIVE_EXT}"
+          
+          # Download the release asset
+          gh release download "${VERSION}" --pattern "${ASSET_NAME}" --dir ./temp
+          
+          # Extract the binary
+          cd temp
+          if [[ "${ARCHIVE_EXT}" == "zip" ]]; then
+            unzip "${ASSET_NAME}"
+          else
+            tar -xzf "${ASSET_NAME}"
+          fi
+          
+          # Move binary to platform package directory
+          mv "${{ matrix.binary }}" "../timedate-mcp-server/platform-packages/${{ matrix.platform }}/"
+
+      - name: Update platform package version
+        working-directory: timedate-mcp-server/platform-packages/${{ matrix.platform }}
+        run: |
+          VERSION=${{ github.event.release.tag_name || github.event.inputs.version }}
+          # Remove 'v' prefix if present
+          VERSION=${VERSION#v}
+          
+          # Update platform package version
+          jq --arg version "$VERSION" '.version = $version' package.json > package.json.tmp && mv package.json.tmp package.json
+
+      - name: Publish platform package
+        working-directory: timedate-mcp-server/platform-packages/${{ matrix.platform }}
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Clean up
+        run: rm -rf temp

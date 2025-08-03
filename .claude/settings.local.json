@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh repo view:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(cargo check:*)",
+      "Bash(cargo search:*)",
+      "Bash(cargo build:*)",
+      "Bash(./target/release/timedate-mcp-server:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}
