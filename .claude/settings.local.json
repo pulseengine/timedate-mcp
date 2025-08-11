@@ -12,7 +12,9 @@
       "Bash(cargo search:*)",
       "Bash(cargo build:*)",
       "Bash(./target/release/timedate-mcp-server:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(./target/debug/timedate-mcp-server)",
+      "WebFetch(domain:docs.rs)"
     ],
     "deny": []
   }

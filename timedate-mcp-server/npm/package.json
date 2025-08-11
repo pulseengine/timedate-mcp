@@ -1,6 +1,6 @@
 {
   "name": "@pulseengine/timedate-mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TimeDate MCP Server - A Model Context Protocol server for time and date operations with timezone support",
   "main": "index.js",
   "bin": {
@@ -47,5 +47,8 @@
   "cpu": [
     "x64",
     "arm64"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

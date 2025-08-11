@@ -109,11 +109,9 @@ jobs:
           # Remove 'v' prefix if present
           VERSION=${VERSION#v}
           
-          # Update main package version
-          npm version $VERSION --no-git-tag-version
-          
-          # Update optionalDependencies to use the same version
+          # Update main package version and optionalDependencies
           jq --arg version "$VERSION" '
+            .version = $version |
             .optionalDependencies = {
               "@pulseengine/timedate-mcp-server-darwin-arm64": $version,
               "@pulseengine/timedate-mcp-server-darwin-x64": $version,

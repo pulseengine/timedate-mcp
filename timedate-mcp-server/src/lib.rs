@@ -1,3 +1,5 @@
+//! TimeDate MCP Server - Time and Date Operations with Timezone Support
+
 use chrono::{DateTime, Local, TimeZone, Utc};
 use chrono_tz::{Tz, TZ_VARIANTS};
 use pulseengine_mcp_macros::{mcp_server, mcp_tools};
@@ -30,19 +32,19 @@ pub struct TimeFormatInfo {
     pub current_time_24h: String,
 }
 
+/// TimeDate MCP Server - Time and Date Operations with Timezone Support
 #[mcp_server(
     name = "TimeDate MCP Server",
     version = "0.1.0",
     description = "A Model Context Protocol server for time and date operations with timezone support",
     auth = "disabled"
 )]
-  
 #[derive(Default, Clone)]
 pub struct TimeDateServer;
 
 #[mcp_tools]
 impl TimeDateServer {
-    /// Get the current time in the specified timezone (defaults to system timezone)
+    /// Get the current time in the specified timezone (defaults to UTC)
     pub async fn get_current_time(&self, timezone: Option<String>) -> anyhow::Result<TimeInfo> {
         let tz = match timezone {
             Some(tz_str) => Tz::from_str(&tz_str)

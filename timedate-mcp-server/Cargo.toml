@@ -28,12 +28,12 @@ anyhow = { workspace = true }
 thiserror = { workspace = true }
 clap = { workspace = true }
 async-trait = { workspace = true }
-pulseengine-mcp-server = { workspace = true }
+pulseengine-mcp-server = { workspace = true, features = ["stdio-logging"] }
 pulseengine-mcp-macros = { workspace = true }
 pulseengine-mcp-protocol = { workspace = true }
 pulseengine-mcp-transport = { workspace = true }
-pulseengine-mcp-auth = { workspace = true, optional = true }
+pulseengine-mcp-auth = { version = "0.8.2", optional = true }
 
 [features]
-default = ["auth"]
+default = []
 auth = ["dep:pulseengine-mcp-auth"]
