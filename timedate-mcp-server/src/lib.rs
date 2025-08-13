@@ -35,7 +35,7 @@ pub struct TimeFormatInfo {
 /// TimeDate MCP Server - Time and Date Operations with Timezone Support
 #[mcp_server(
     name = "TimeDate MCP Server",
-    version = "0.1.0",
+    version = "0.2.0",
     description = "A Model Context Protocol server for time and date operations with timezone support",
     auth = "disabled"
 )]
@@ -44,17 +44,6 @@ pub struct TimeDateServer;
 
 #[mcp_tools]
 impl TimeDateServer {
-    /// Get the current time in the specified timezone (defaults to UTC)
-    pub async fn get_current_time(&self, timezone: Option<String>) -> anyhow::Result<TimeInfo> {
-        let tz = match timezone {
-            Some(tz_str) => Tz::from_str(&tz_str)
-                .map_err(|_| anyhow::anyhow!("Invalid timezone: {}", tz_str))?,
-            None => chrono_tz::UTC, // Default to UTC if no timezone specified
-        };
-
-        let now = Utc::now().with_timezone(&tz);
-        Ok(self.format_time_info(now))
-    }
 
     /// Get time at a specific date and timezone
     pub async fn get_time_at(
@@ -103,22 +92,6 @@ impl TimeDateServer {
         Ok(self.format_time_info(result_dt))
     }
 
-    /// Get current timezone information
-    pub async fn get_timezone_info(&self) -> anyhow::Result<TimezoneInfo> {
-        let now = Local::now();
-        let offset = now.offset();
-        
-        // Try to determine if we're in DST by comparing with standard offset
-        // This is a simple heuristic since FixedOffset doesn't have dst_offset
-        let _is_dst = offset.local_minus_utc() != offset.local_minus_utc();
-        
-        Ok(TimezoneInfo {
-            name: "Local".to_string(), // Local timezone doesn't expose name directly
-            current_time: now.format("%Y-%m-%d %H:%M:%S %Z").to_string(),
-            utc_offset: now.format("%z").to_string(),
-            is_dst: false, // Can't easily determine DST for local timezone
-        })
-    }
 
     /// Convert time between timezones
     pub async fn convert_timezone(
@@ -146,8 +119,75 @@ impl TimeDateServer {
         Ok(self.format_time_info(converted))
     }
 
+    
+    /// Get current time in local timezone (exposed as a tool for now)
+    pub async fn get_current_time(&self, timezone: Option<String>) -> anyhow::Result<TimeInfo> {
+        self.get_current_time_internal(timezone).await
+    }
+
+    /// Get current timezone information  
+    pub async fn get_timezone_info(&self) -> anyhow::Result<TimezoneInfo> {
+        let now = Local::now();
+        let _offset = now.offset();
+        
+        Ok(TimezoneInfo {
+            name: "Local".to_string(), // Local timezone doesn't expose name directly
+            current_time: now.format("%Y-%m-%d %H:%M:%S %Z").to_string(),
+            utc_offset: now.format("%z").to_string(),
+            is_dst: false, // Can't easily determine DST for local timezone
+        })
+    }
+
     /// Get time format preference information
     pub async fn get_time_format(&self) -> anyhow::Result<TimeFormatInfo> {
+        self.get_time_format_internal().await
+    }
+
+    /// List available timezones
+    pub async fn list_timezones(&self, filter: Option<String>) -> anyhow::Result<Vec<String>> {
+        self.list_timezones_internal(filter).await
+    }
+
+    // TODO: Resources disabled temporarily due to framework bug in v0.9.0
+    // The mcp_server macro doesn't properly delegate to McpResourcesProvider
+    // Will re-enable once framework is fixed
+}
+
+// Resources will be re-added once framework v0.9.1 fixes the delegation bug
+
+// Internal implementation (for now we'll keep the improved architecture concept but use tools)
+impl TimeDateServer {
+
+
+    // Internal helper methods (moved from tools)
+    async fn get_current_time_internal(&self, timezone: Option<String>) -> anyhow::Result<TimeInfo> {
+        let tz = match timezone {
+            Some(tz_str) => Tz::from_str(&tz_str)
+                .map_err(|_| anyhow::anyhow!("Invalid timezone: {}", tz_str))?,
+            None => chrono_tz::UTC, // Default to UTC if no timezone specified
+        };
+
+        let now = Utc::now().with_timezone(&tz);
+        Ok(self.format_time_info(now))
+    }
+
+    async fn list_timezones_internal(&self, filter: Option<String>) -> anyhow::Result<Vec<String>> {
+        let timezones: Vec<String> = TZ_VARIANTS
+            .iter()
+            .map(|tz| tz.name().to_string())
+            .filter(|name| {
+                match &filter {
+                    Some(f) => name.to_lowercase().contains(&f.to_lowercase()),
+                    None => true,
+                }
+            })
+            .take(50) // Limit results
+            .collect();
+
+        Ok(timezones)
+    }
+
+    async fn get_time_format_internal(&self) -> anyhow::Result<TimeFormatInfo> {
         let now = Local::now();
         
         // Simple heuristic: check system locale or default to 24h
@@ -163,23 +203,6 @@ impl TimeDateServer {
             current_time_12h: now.format("%I:%M:%S %p").to_string(),
             current_time_24h: now.format("%H:%M:%S").to_string(),
         })
-    }
-
-    /// List available timezones
-    pub async fn list_timezones(&self, filter: Option<String>) -> anyhow::Result<Vec<String>> {
-        let timezones: Vec<String> = TZ_VARIANTS
-            .iter()
-            .map(|tz| tz.name().to_string())
-            .filter(|name| {
-                match &filter {
-                    Some(f) => name.to_lowercase().contains(&f.to_lowercase()),
-                    None => true,
-                }
-            })
-            .take(50) // Limit results
-            .collect();
-
-        Ok(timezones)
     }
 }
 
@@ -201,3 +224,4 @@ impl TimeDateServer {
         }
     }
 }
+
