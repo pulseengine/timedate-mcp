@@ -1,6 +1,6 @@
 [package]
 name = "timedate-mcp-server"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "A Model Context Protocol server for time and date operations with timezone support"
 license = "MIT"
