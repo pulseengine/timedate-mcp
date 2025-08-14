@@ -2,7 +2,7 @@
 
 use chrono::{DateTime, Local, TimeZone, Utc};
 use chrono_tz::{Tz, TZ_VARIANTS};
-use pulseengine_mcp_macros::{mcp_server, mcp_tools};
+use pulseengine_mcp_macros::{mcp_server, mcp_tools, mcp_resource};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -148,12 +148,63 @@ impl TimeDateServer {
         self.list_timezones_internal(filter).await
     }
 
-    // TODO: Resources disabled temporarily due to framework bug in v0.9.0
-    // The mcp_server macro doesn't properly delegate to McpResourcesProvider
-    // Will re-enable once framework is fixed
+    // Resources - Read-only data accessible via MCP resource URIs
+    
+    /// Get current time as a resource
+    #[mcp_resource(
+        uri_template = "timedate://current-time/{timezone}",
+        name = "current_time",
+        description = "Current time in the specified timezone",
+        mime_type = "application/json"
+    )]
+    pub async fn current_time_resource(&self, timezone: String) -> anyhow::Result<TimeInfo> {
+        let tz_option = if timezone == "local" { None } else { Some(timezone) };
+        self.get_current_time_internal(tz_option).await
+    }
+
+    /// Get timezone information as a resource
+    #[mcp_resource(
+        uri_template = "timedate://timezone-info",
+        name = "timezone_info", 
+        description = "Information about the local timezone",
+        mime_type = "application/json"
+    )]
+    pub async fn timezone_info_resource(&self) -> anyhow::Result<TimezoneInfo> {
+        let now = Local::now();
+        
+        Ok(TimezoneInfo {
+            name: "Local".to_string(),
+            current_time: now.format("%Y-%m-%d %H:%M:%S %Z").to_string(),
+            utc_offset: now.format("%z").to_string(),
+            is_dst: false,
+        })
+    }
+
+    /// Get list of available timezones as a resource
+    #[mcp_resource(
+        uri_template = "timedate://timezones/{filter}",
+        name = "timezone_list",
+        description = "List of available timezones, optionally filtered",
+        mime_type = "application/json"
+    )]
+    pub async fn timezone_list_resource(&self, filter: String) -> anyhow::Result<Vec<String>> {
+        let filter_option = if filter == "all" { None } else { Some(filter) };
+        self.list_timezones_internal(filter_option).await
+    }
+
+    /// Get time format preferences as a resource
+    #[mcp_resource(
+        uri_template = "timedate://time-format",
+        name = "time_format",
+        description = "Time format preferences and current time in both formats",
+        mime_type = "application/json"
+    )]
+    pub async fn time_format_resource(&self) -> anyhow::Result<TimeFormatInfo> {
+        self.get_time_format_internal().await
+    }
 }
 
-// Resources will be re-added once framework v0.9.1 fixes the delegation bug
+// Resources now working with framework v0.9.1!
 
 // Internal implementation (for now we'll keep the improved architecture concept but use tools)
 impl TimeDateServer {
