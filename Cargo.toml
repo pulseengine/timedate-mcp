@@ -16,8 +16,8 @@ anyhow = "1.0"
 thiserror = "1.0"
 clap = { version = "4.0", features = ["derive"] }
 async-trait = "0.1"
-# Use published v0.9.1 framework version
-pulseengine-mcp-server = { version = "0.9.1", features = ["stdio-logging"] }
-pulseengine-mcp-macros = { version = "0.9.1" }
-pulseengine-mcp-protocol = { version = "0.9.1" }
-pulseengine-mcp-transport = { version = "0.9.1" }
+# Use published framework version 0.10.0 with parameterized resource support
+pulseengine-mcp-server = { version = "0.10.0", features = ["stdio-logging"] }
+pulseengine-mcp-macros = "0.10.0"
+pulseengine-mcp-protocol = "0.10.0"
+pulseengine-mcp-transport = "0.10.0"

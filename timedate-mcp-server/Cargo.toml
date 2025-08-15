@@ -1,6 +1,6 @@
 [package]
 name = "timedate-mcp-server"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 description = "A Model Context Protocol server for time and date operations with timezone support"
 license = "MIT"
@@ -32,7 +32,9 @@ pulseengine-mcp-server = { workspace = true, features = ["stdio-logging"] }
 pulseengine-mcp-macros = { workspace = true }
 pulseengine-mcp-protocol = { workspace = true }
 pulseengine-mcp-transport = { workspace = true }
-pulseengine-mcp-auth = { version = "0.9.0", optional = true }
+pulseengine-mcp-auth = { version = "0.10.0", optional = true }
+# Required for parameterized resource routing
+matchit = "0.8"
 
 [features]
 default = []

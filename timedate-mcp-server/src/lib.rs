@@ -35,8 +35,8 @@ pub struct TimeFormatInfo {
 /// TimeDate MCP Server - Time and Date Operations with Timezone Support
 #[mcp_server(
     name = "TimeDate MCP Server",
-    version = "0.2.1",
-    description = "A Model Context Protocol server for time and date operations with timezone support",
+    version = "0.3.0",
+    description = "A Model Context Protocol server for time and date operations with timezone support with parameterized resources",
     auth = "disabled"
 )]
 #[derive(Default, Clone)]
