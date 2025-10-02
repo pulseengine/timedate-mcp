@@ -1,42 +1,42 @@
-[package]
-name = "timedate-mcp-server"
-version = "0.4.0"
-edition = "2021"
-description = "A Model Context Protocol server for time and date operations with timezone support"
-license = "MIT"
-authors = ["PulseEngine <info@pulseengine.ai>"]
-repository = "https://github.com/pulseengine/timedate-mcp"
-keywords = ["mcp", "model-context-protocol", "time", "date", "timezone"]
-
 [[bin]]
 name = "timedate-mcp-server"
 path = "src/main.rs"
+
+[dependencies]
+anyhow = {workspace = true}
+async-trait = {workspace = true}
+chrono = {workspace = true}
+chrono-tz = {workspace = true}
+clap = {workspace = true}
+# Required for parameterized resource routing
+matchit = "0.8"
+pulseengine-mcp-auth = {version = "0.11.0", optional = true}
+pulseengine-mcp-macros = {workspace = true}
+pulseengine-mcp-protocol = {workspace = true}
+pulseengine-mcp-server = {workspace = true, features = ["stdio-logging"]}
+pulseengine-mcp-transport = {workspace = true}
+schemars = {workspace = true}
+serde = {workspace = true}
+serde_json = {workspace = true}
+thiserror = {workspace = true}
+tokio = {workspace = true}
+tracing = {workspace = true}
+tracing-subscriber = {workspace = true}
+
+[features]
+auth = ["dep:pulseengine-mcp-auth"]
+default = []
 
 [lib]
 name = "timedate_mcp_server"
 path = "src/lib.rs"
 
-[dependencies]
-tokio = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-chrono = { workspace = true }
-chrono-tz = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-anyhow = { workspace = true }
-thiserror = { workspace = true }
-clap = { workspace = true }
-async-trait = { workspace = true }
-schemars = { workspace = true }
-pulseengine-mcp-server = { workspace = true, features = ["stdio-logging"] }
-pulseengine-mcp-macros = { workspace = true }
-pulseengine-mcp-protocol = { workspace = true }
-pulseengine-mcp-transport = { workspace = true }
-pulseengine-mcp-auth = { version = "0.11.0", optional = true }
-# Required for parameterized resource routing
-matchit = "0.8"
-
-[features]
-default = []
-auth = ["dep:pulseengine-mcp-auth"]
+[package]
+authors = ["PulseEngine <info@pulseengine.ai>"]
+description = "A Model Context Protocol server for time and date operations with timezone support"
+edition = "2021"
+keywords = ["mcp", "model-context-protocol", "time", "date", "timezone"]
+license = "MIT"
+name = "timedate-mcp-server"
+repository = "https://github.com/pulseengine/timedate-mcp"
+version = "0.4.0"

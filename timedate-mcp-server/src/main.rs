@@ -1,7 +1,7 @@
 //! TimeDate MCP Server - Time and Date Operations with Timezone Support
 
-use timedate_mcp_server::TimeDateServer;
 use pulseengine_mcp_server::McpServerBuilder;
+use timedate_mcp_server::TimeDateServer;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

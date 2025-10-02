@@ -5,7 +5,7 @@ const fs = require("fs");
 
 function cleanup() {
   const binDir = path.join(__dirname, "bin");
-  
+
   try {
     if (fs.existsSync(binDir)) {
       fs.rmSync(binDir, { recursive: true, force: true });

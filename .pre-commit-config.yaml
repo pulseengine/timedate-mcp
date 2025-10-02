@@ -1,0 +1,70 @@
+# Pre-commit hooks configuration
+# Install: pip install pre-commit
+# Setup: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.lock$'
+      - id: end-of-file-fixer
+        exclude: '\.lock$'
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom YAML tags
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+
+  # Rust formatting
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+  # Rust linting
+  - repo: local
+    hooks:
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy
+        args: ['--all-targets', '--all-features', '--', '-D', 'warnings']
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+  # Rust security audit (optional - can be slow)
+  - repo: local
+    hooks:
+      - id: cargo-check
+        name: cargo check
+        entry: cargo check
+        args: ['--all-targets', '--all-features']
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+  # TOML sorting and formatting
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.14.0
+    hooks:
+      - id: pretty-format-toml
+        args: ['--autofix']
