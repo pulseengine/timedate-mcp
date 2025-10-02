@@ -3,10 +3,11 @@
 use chrono::{DateTime, Local, TimeZone, Utc};
 use chrono_tz::{Tz, TZ_VARIANTS};
 use pulseengine_mcp_macros::{mcp_server, mcp_tools, mcp_resource};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct TimeInfo {
     pub timestamp: String,
     pub timezone: String,
@@ -16,7 +17,7 @@ pub struct TimeInfo {
     pub format_24h: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct TimezoneInfo {
     pub name: String,
     pub current_time: String,
@@ -24,7 +25,7 @@ pub struct TimezoneInfo {
     pub is_dst: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct TimeFormatInfo {
     pub detected_format: String,
     pub is_12_hour: bool,
@@ -35,7 +36,7 @@ pub struct TimeFormatInfo {
 /// TimeDate MCP Server - Time and Date Operations with Timezone Support
 #[mcp_server(
     name = "TimeDate MCP Server",
-    version = "0.3.0",
+    version = "0.4.0",
     description = "A Model Context Protocol server for time and date operations with timezone support with parameterized resources",
     auth = "disabled"
 )]
