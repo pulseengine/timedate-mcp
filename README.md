@@ -1,7 +1,23 @@
+<div align="center">
+
 # TimeDate MCP Server
 
-A Model Context Protocol (MCP) server providing comprehensive time and date operations with timezone support,
-built with Rust and the PulseEngine MCP framework.
+<sup>Time and date operations with timezone support</sup>
+
+&nbsp;
+
+![Rust](https://img.shields.io/badge/Rust-CE422B?style=flat-square&logo=rust&logoColor=white&labelColor=1a1b27)
+![MCP](https://img.shields.io/badge/MCP-654FF0?style=flat-square&logoColor=white&labelColor=1a1b27)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square&labelColor=1a1b27)
+
+</div>
+
+&nbsp;
+
+A Model Context Protocol server providing comprehensive time and date operations with timezone support, built with the PulseEngine MCP framework.
+
+> [!NOTE]
+> Part of the PulseEngine toolchain. Built with the [PulseEngine MCP framework](https://github.com/pulseengine/mcp).
 
 ## Features
 
@@ -187,3 +203,11 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Contributing
 
 Contributions welcome! Please read our contributing guidelines and submit pull requests to our [GitHub repository](https://github.com/pulseengine/timedate-mcp).
+
+---
+
+<div align="center">
+
+<sub>Part of <a href="https://github.com/pulseengine">PulseEngine</a> &mdash; formally verified WebAssembly toolchain for safety-critical systems</sub>
+
+</div>
