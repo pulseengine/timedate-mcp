@@ -20,6 +20,8 @@ env:
 jobs:
   build-binaries:
     name: Build ${{ matrix.target }}
+    # Stays on ubuntu-latest: cross-OS release matrix (linux/macos/
+    # macos-14/windows). Smithy is Linux-only.
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -91,7 +93,7 @@ jobs:
   publish-npm:
     name: Publish to NPM
     needs: build-binaries
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, light]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -149,7 +151,7 @@ jobs:
   build-platform-packages:
     name: Build Platform Packages
     needs: build-binaries
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, light]
     strategy:
       matrix:
         include:
